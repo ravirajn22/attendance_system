@@ -1,19 +1,15 @@
 const express = require('express');
-var pgp = require('pg-promise')(/*options*/)
-var db = pgp('postgres://postgres:postgres@localhost:5432/userdb')
+const app = express();
+var employeeRouter = require('./routers/employees');
+var bodyParser = require('body-parser');
 
-const app = express()
+var port = 9000;
 
-app.get('/', function (req, res) {
-  db.one('SELECT * FROM employees WHERE id=$1',1)
-    .then(function (data) {
-      console.log('DATA:', data.first_name)
-    })
-    .catch(function (error) {
-      console.log('ERROR:', error)
-    })
-})
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!')
-})
+app.use('/employees', employeeRouter);
+
+app.listen(port,function() {
+  console.log('Server hearing at ' + port);
+});
