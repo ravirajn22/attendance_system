@@ -28,9 +28,11 @@ router.post('/', function(req,res) {
   db.none('INSERT INTO employees(first_name,work_email,mobile) VALUES($1,$2,$3)',[req.body.first_name,req.body.work_email,req.body.mobile])
     .then(() => {
       console.log('insert success');
+      res.status(200).json({message:'employee added'});
     })
     .catch((error) => {
       console.log('ERROR:', error);
+      res.status(400).json({message:error.detail});
     });
 })
 
