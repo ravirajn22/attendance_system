@@ -1,17 +1,22 @@
 const express = require('express');
 const moment = require('moment');
+var multer  = require('multer')
+var upload = multer({ dest: 'clockimages/' })
 var router = express.Router();
 
 var pgp = require('pg-promise')(/*options*/);
 var db = pgp('postgres://postgres:postgres@localhost:5432/userdb');
 
-router.post('/clockin',function(req,res) {
+router.post('/clockin',upload.single('photo'),function(req,res,next) {
   let start_time = moment().format();
-  let emp_id = 33;
+  let emp_id = 8;
   let in_latitude = req.body.in_latitude;
   let in_longitude = req.body.in_longitude;
+  let in_image_url = req.file.path;
 
-  db.one('INSERT INTO timesheets(start_time,emp_id,in_latitude,in_longitude) VALUES($1,$2,$3,$4) RETURNING id,start_time,in_latitude,out_latitude',[start_time,emp_id,in_latitude,in_longitude])
+  console.log(req.file);
+  console.log(req.body);
+  db.one('INSERT INTO timesheets(start_time,emp_id,in_latitude,in_longitude,in_image_url) VALUES($1,$2,$3,$4,$5) RETURNING id,start_time,in_latitude,in_longitude',[start_time,emp_id,in_latitude,in_longitude,in_image_url])
     .then((data) => {
       console.log('Clocked in');
       res.status(200).json(data);
@@ -40,7 +45,7 @@ router.post('/clockout',function(req,res) {
 });
 
 router.get('/status',function(req,res) {
-  let emp_id = 33;
+  let emp_id = 8;
   db.oneOrNone('SELECT * FROM timesheets WHERE end_time IS NULL and emp_id=$1 LIMIT 1',[emp_id])
     .then((data) => {
       console.log('status checked');
